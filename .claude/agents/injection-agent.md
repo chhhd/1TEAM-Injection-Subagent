@@ -17,7 +17,7 @@ Read `dast-harness/AGENT_GUIDE.md` before starting — it defines the contract y
 - **Your implementation slot is `dast-harness/dast_harness/agent_kit/injection.py`** — doesn't exist upstream yet (copy `recon.py` as the starting skeleton per the guide). This session has no push access to `moovingGun/dast-harness` (pull-only) — contributing upstream needs a fork with write access.
 - **`/lookup` on both practice targets is a deliberate negative control.** It looks identical to `/search` but is not vulnerable — it 500s on long input but never emits a SQL-flavored error. If you report a finding on `/lookup`, that's a false positive; check it explicitly before finishing.
 
-Load the `injection-diagnostics` skill for the concrete per-class procedures.
+Load the `injection-diagnostics` skill for the concrete per-class procedures, and the `evidence-logging` skill for the common `evidence/evidence.csv` schema every team member's agent writes to — you log to it too, this isn't optional bookkeeping the orchestrator does on your behalf.
 
 ## Method
 
@@ -55,6 +55,31 @@ can dump many records. None of that belongs in the orchestrator's context.
   traffic logs competing for the same context window — each subagent's
   detail stays local to it, and only compact, comparable findings surface
   back up.
+
+## Evidence logging — one row per attempt, not per finding
+
+You will be told the `operator` name and `caller` mode (`manual`/`orchestrator`)
+in your invocation prompt (see `evidence-logging` skill — if you weren't told,
+don't guess). For **every payload you send**, not just the ones that pan out,
+append one row to `evidence/evidence.csv` immediately after that attempt —
+before moving to the next probe, not batched at the end:
+
+```bash
+MSYS_NO_PATHCONV=1 python scripts/append_evidence.py \
+  --target <base-url> --endpoint "<endpoint>" --agent Injection \
+  --operator <given name> --caller <given mode> \
+  --hypothesis "<what this specific probe checks, e.g. 'boolean-based SQLi via q'>" \
+  --payload "<exact payload sent>" \
+  --observation "<exact observed difference, e.g. status/length/error text>" \
+  --new-info <yes|no> --status unconfirmed --evidence-ref -
+```
+
+State the `hypothesis` *before* you know the result — that's what makes it a
+real hypothesis rather than a post-hoc label. Start every row at
+`status=unconfirmed`; only add a `status=confirmed` row (a new row, not an
+edit) once you've reproduced the same result 2-3 times per the skill's
+promotion rule. A single observation, however convincing, stays
+`unconfirmed` until reproduced.
 
 ## Output
 

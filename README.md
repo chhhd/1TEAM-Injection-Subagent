@@ -9,6 +9,27 @@
 | Subagent 정의 | `.claude/agents/injection-agent.md` | 역할(SQLi/Command Injection/SSTI, 인가 이슈는 스코프 밖), tool 범위 제한, 컨텍스트 격리 설계, 출력 계약 |
 | 진단 절차 skill | `.claude/skills/injection-diagnostics/SKILL.md` | Check 1~5를 "You are an expert" 식이 아니라 클래스별 구체적 절차(구문 깨기 → 회복으로 인과관계 증명 → 무엇을 자제할지)로 구조화 |
 | 컨텍스트 격리 실측 | `docs/context-isolation-test.md` | 4038바이트 응답을 실제로 발생시켜, subagent가 이를 내부에서 전부 읽고 메인 세션엔 약 1,550자 요약만 반환함을 바이트 단위로 검증 |
+| 증적 기록(evidence.csv) | `evidence/`, `scripts/` | injection-agent가 남기는 시도 로그 — 아래 참고 |
+
+## 증적을 남기는 과정 (evidence.csv)
+
+`injection-agent.md`는 evidence-logging skill을 로드하고, **보낸 페이로드
+하나하나마다** (finding으로 이어졌든 아니든) `evidence/evidence.csv`에
+`agent=Injection`으로 즉시 한 행을 남긴다. hypothesis는 결과를 보기 전에
+적고, 손 편집 대신 `scripts/append_evidence.py`로만 기록한다.
+
+**실제로 검증됨** — `evidence/evidence.csv`의 6행은 injection-agent를
+`/search`(baseline→attack→control→재현확인) + `/lookup`(음성 대조군
+baseline+attack)에 실제로 돌려서 시도마다 즉시 기록한 결과다.
+`python scripts/confirmed_summary.py --agent Injection`을 돌리면 5건의
+unconfirmed는 걸러지고 재현까지 확인된 `/search` SQLi 1건만 confirmed로
+나온다 — 실제로 확인함.
+
+> Windows Git Bash(MSYS2)는 `--endpoint` 값이 순수 경로 모양(예: `/admin`)이면
+> 조용히 윈도우 경로로 바꿔치기하는 문제가 있다(다른 팀원 repo에서 실제로
+> 겪음). `/search?q=`처럼 `?`가 섞인 값은 이 문제를 우연히 피해가지만,
+> 안전하게는 항상 `MSYS_NO_PATHCONV=1`을 붙인다 — `scripts/append_evidence.py`
+> docstring과 `evidence/README.md`에 반영돼 있다.
 
 ## Tool 범위 제한
 
