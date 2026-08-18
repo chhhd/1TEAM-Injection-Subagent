@@ -10,6 +10,7 @@
 | 진단 절차 skill | `.claude/skills/injection-diagnostics/SKILL.md` | Check 1~5를 "You are an expert" 식이 아니라 클래스별 구체적 절차(구문 깨기 → 회복으로 인과관계 증명 → 무엇을 자제할지)로 구조화 |
 | 컨텍스트 격리 실측 | `docs/context-isolation-test.md` | 4038바이트 응답을 실제로 발생시켜, subagent가 이를 내부에서 전부 읽고 메인 세션엔 약 1,550자 요약만 반환함을 바이트 단위로 검증 |
 | 증적 기록(evidence.csv) | `evidence/`, `scripts/` | injection-agent가 남기는 시도 로그 — 아래 참고 |
+| **구현체(Python)** | `dast_harness/agent_kit/injection.py`, `tests/test_injection.py` | 위 설계를 실제로 구현한 `dast-harness` 통합용 에이전트 코드 — 원래 별도 저장소([`1mhe2y0ung/Injection-subagent`](https://github.com/1mhe2y0ung/Injection-subagent))였던 것을 이 저장소가 지정하는 배치 경로 그대로 병합했다. 상세 설명은 `docs/implementation.md` 참고 |
 
 ## 증적을 남기는 과정 (evidence.csv)
 
@@ -67,6 +68,11 @@ tools: Read, Grep, Glob, Bash, WebFetch
 통합 저장소 [`SECURITY-1TEAM-Orchestrator-chain`](https://github.com/chhhd/SECURITY-1TEAM-Orchestrator-chain)에
 같은 파일이 `recon-agent`/`access-control-agent`와 나란히 들어 있다. 이
 저장소는 그중 injection 부분만 떼어낸 슬라이스다.
+
+구현체 저장소 [`1mhe2y0ung/Injection-subagent`](https://github.com/1mhe2y0ung/Injection-subagent)는
+이 저장소의 설계(`injection-agent.md`, `injection-diagnostics` skill)를 실제
+Python 코드로 옮긴 산출물이며, `dast_harness/agent_kit/injection.py`와
+`tests/test_injection.py`로 이 저장소에 병합돼 있다.
 
 ## 알아둘 것
 
