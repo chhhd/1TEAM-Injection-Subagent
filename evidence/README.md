@@ -54,13 +54,17 @@ append-only 로그다.
 4. **status는 본인이 1차 판단** — `unconfirmed`로 우선 기록, 재현 2~3회 확인 후
    본인이 `confirmed`로 승격. 애매하면 CVE 담당(박정근)이나 팀원1에게
    크로스체크 요청 후 승격.
-5. **커밋 & 상태판 갱신**:
-   ```bash
-   git add evidence/evidence.csv
-   git commit -m "<이름>: <endpoint> <agent> 시도 N건"
-   git push
-   ```
+5. **커밋 & 푸시는 `append_evidence.py`가 자동으로 한다** — 행을 쓴 직후
+   스크립트가 `git add` → `git commit -m "<이름>: <endpoint> <agent> 시도
+   기록 [<status>]"` → `git push`까지 이어서 실행한다. 사람이 따로 커밋할
+   필요는 없다(직접 해도 무방하지만 중복이다). 실패해도(원격 미설정, 충돌,
+   오프라인 등) 스크립트는 경고만 출력하고 계속 진행한다 — 이 경우
+   `git status`/`git log`로 로컬 상태를 확인하고 필요시 직접 push한다.
    그리고 상태판을 성공/실패/막힘으로 갱신.
+
+   > **주의**: 이제 시도 하나하나가 즉시 팀 공유 원격 저장소에 push된다 —
+   > `hypothesis`/`payload`/`observation`을 한 번 더 확인하고 스크립트를
+   > 실행한다. 되돌리려면 팀 전체에 알리고 `git revert`를 써야 한다.
 6. **`1TEAM-MEMORY`에도 동기화** — 실제 Phase 1~4 게임 중에는 5번에서 커밋한
    같은 행을 옆에 클론해둔 [`1TEAM-MEMORY`](https://github.com/chhhd/1TEAM-MEMORY)에도
    append하고 push한다 (스크립트/스키마 동일, `1TEAM-MEMORY/scripts/append_evidence.py`

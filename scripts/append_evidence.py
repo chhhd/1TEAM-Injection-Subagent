@@ -5,6 +5,17 @@ the CSV: payloads routinely contain commas, quotes, and newlines (SQLi/SSTI
 payloads especially), and csv.writer is what keeps those from corrupting
 the file. Run once per test attempt, immediately after that attempt.
 
+AUTO-COMMIT + AUTO-PUSH: after appending the row, this script runs
+`git add evidence/evidence.csv`, commits it, and pushes to the current
+branch's upstream — automatically, no separate human step. This replaced
+the previous manual "run git add/commit/push yourself" rule; see
+evidence/README.md and the evidence-logging skill for the current text.
+Each push lands on the shared team remote immediately, so a bad
+payload/observation string is visible to the whole team right away — write
+it carefully. If commit or push fails (e.g. no upstream configured, merge
+conflict, offline), the script prints a warning but does not fail the run;
+the row is still safely in the local CSV and working tree.
+
 WINDOWS / GIT BASH WARNING (found the hard way, not hypothetical):
 Git Bash (MSYS2) auto-rewrites argv values that look like a bare POSIX path
 before this script ever sees them — e.g. --endpoint "/admin" silently
@@ -35,6 +46,7 @@ Usage:
 import argparse
 import csv
 import os
+import subprocess
 import sys
 from datetime import datetime
 
@@ -101,6 +113,44 @@ def main():
             "evidence_ref": args.evidence_ref,
         })
     print(f"appended: {timestamp} {args.agent} {args.endpoint} [{args.status}] by {args.operator}")
+
+    _auto_commit_and_push(args)
+
+
+def _run_git(*git_args) -> subprocess.CompletedProcess:
+    return subprocess.run(["git", *git_args], cwd=ROOT,
+                           capture_output=True, text=True)
+
+
+def _auto_commit_and_push(args) -> None:
+    """Stage, commit, and push evidence.csv right after appending — no
+    separate manual step. Never raises: a failure here (no upstream, merge
+    conflict, offline) is printed as a warning, not a fatal error, since the
+    row is already safely written to the local CSV either way."""
+    rel_path = os.path.relpath(CSV_PATH, ROOT)
+
+    add = _run_git("add", rel_path)
+    if add.returncode != 0:
+        print(f"warning: git add failed:\n{add.stderr}", file=sys.stderr)
+        return
+
+    message = f"{args.operator}: {args.endpoint} {args.agent} 시도 기록 [{args.status}]"
+    commit = _run_git("commit", "-m", message)
+    if commit.returncode != 0:
+        # Most commonly: nothing to commit (row identical to a prior one is
+        # not possible with a timestamp, but git can still no-op in odd
+        # cases) or no git identity configured.
+        print(f"warning: git commit failed:\n{commit.stderr or commit.stdout}",
+              file=sys.stderr)
+        return
+    print(f"committed: {message}")
+
+    push = _run_git("push")
+    if push.returncode != 0:
+        print(f"warning: git push failed (row committed locally, not on remote yet):\n{push.stderr}",
+              file=sys.stderr)
+        return
+    print("pushed to remote")
 
 
 if __name__ == "__main__":
