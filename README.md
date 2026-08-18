@@ -1,6 +1,6 @@
 # 1TEAM-Injection-Subagent
 
-팀원3(임희영) — Injection Subagent 담당 산출물.
+팀원3 — Injection Subagent 담당 산출물.
 
 ## 이 저장소에 있는 것
 

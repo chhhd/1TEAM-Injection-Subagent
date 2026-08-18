@@ -33,7 +33,7 @@ CSV를 텍스트 에디터로 직접 고치지 않는다 — payload에 쉼표/�
 ```bash
 MSYS_NO_PATHCONV=1 python scripts/append_evidence.py \
   --target http://127.0.0.1:5000 --endpoint "/search?q=" --agent Injection \
-  --operator 임희영 --caller manual \
+  --operator 팀원3 --caller manual \
   --hypothesis "Boolean 기반 SQLi 여부" \
   --payload "q=' OR '1'='1" \
   --observation "응답 200, 레코드 2건->3건 (기밀 레코드 포함)" \
@@ -105,6 +105,6 @@ evidence/evidence.csv`)가 사실상의 상태판 역할을 한다.
 |---|---|
 | 이동건 | 오케스트레이션 & 인프라 |
 | 이나윤 | Recon |
-| 임희영 | Injection |
+| 팀원3 | Injection |
 | 박나현 | IDOR / Auth (Access-control) |
 | 박정근 | CVE & 평가 |
