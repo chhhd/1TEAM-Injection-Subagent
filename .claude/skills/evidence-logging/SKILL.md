@@ -72,7 +72,7 @@ row before committing.
 4. **status는 본인이 1차 판단** — 처음엔 `unconfirmed`로 기록. 재현 테스트
    2~3회 반복까지 확인되면 같은 endpoint/payload로 다시 스크립트를 실행해
    `--status confirmed`로 승격 행을 추가한다 (기존 행을 고치지 않고 새 행을
-   추가 — CSV는 append-only 로그다). 판단이 애매하면 CVE 담당(박정근)이나
+   추가 — CSV는 append-only 로그다). 판단이 애매하면 CVE 담당(팀원5)이나
    팀원1에게 크로스체크 요청한 뒤 승격한다.
 5. **커밋 & 푸시는 자동이다** — `append_evidence.py`가 행을 쓴 직후 `git add`
    → `git commit -m "<이름>: <endpoint> <agent> 시도 기록 [<status>]"` →

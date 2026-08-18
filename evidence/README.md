@@ -52,7 +52,7 @@ append-only 로그다.
    있어서, 이 단계에서 바로 로그에 옮길 재료가 나온다.
 3. **시도 하나 끝날 때마다 즉시 한 행 기록** — 몰아서 적지 않는다.
 4. **status는 본인이 1차 판단** — `unconfirmed`로 우선 기록, 재현 2~3회 확인 후
-   본인이 `confirmed`로 승격. 애매하면 CVE 담당(박정근)이나 팀원1에게
+   본인이 `confirmed`로 승격. 애매하면 CVE 담당(팀원5)이나 팀원1에게
    크로스체크 요청 후 승격.
 5. **커밋 & 푸시는 `append_evidence.py`가 자동으로 한다** — 행을 쓴 직후
    스크립트가 `git add` → `git commit -m "<이름>: <endpoint> <agent> 시도
@@ -106,5 +106,5 @@ evidence/evidence.csv`)가 사실상의 상태판 역할을 한다.
 | 이동건 | 오케스트레이션 & 인프라 |
 | 이나윤 | Recon |
 | 팀원3 | Injection |
-| 박나현 | IDOR / Auth (Access-control) |
-| 박정근 | CVE & 평가 |
+| 팀원4 | IDOR / Auth (Access-control) |
+| 팀원5 | CVE & 평가 |
